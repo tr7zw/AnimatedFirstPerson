@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "animatedfirstperson",
+  "version": "${version}",
+
+  "name": "Animated First Person",
+  "description": "Make the First Person animations more like other games like CounterStrike.",
+  "authors": [
+    "tr7zw"
+  ],
+  "contact": {
+    "homepage": "https://github.com/tr7zw",
+    "sources": "https://github.com/tr7zw/3d-skin-layers"
+  },
+
+  "license": "tr7zw Protective License",
+  "icon": "assets/animatedfirstperson/icon.png",
+
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.tr7zw.animatedfirstperson.AnimatedFirstPersonMod"
+    ]
+  },
+  "mixins": [
+    "animatedfirstperson.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.11.3",
+    "minecraft": "1.18.x",
+    "java": ">=16"
+  }
+}

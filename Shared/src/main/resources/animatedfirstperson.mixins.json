@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.tr7zw.animatedfirstperson.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "refmap": "animatedfirstperson.refmap.mixins.json",
+  "mixins": [
+  ],
+  "client": [
+    "HeldItemRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
