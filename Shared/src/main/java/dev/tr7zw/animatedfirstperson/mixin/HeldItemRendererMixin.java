@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 
 import dev.tr7zw.animatedfirstperson.AnimatedFirstPersonShared;
@@ -181,6 +182,7 @@ public class HeldItemRendererMixin {
                 float r = 0.2F * Mth.sin(Mth.sqrt(swingProgress) * 6.2831855F);
                 float l = -0.2F * Mth.sin(swingProgress * 3.1415927F);
                 int armMultiplicator = bl2 ? 1 : -1; //t
+                minecraft.gameRenderer.resetProjectionMatrix(minecraft.gameRenderer.getProjectionMatrix(AnimatedFirstPersonShared.debugConfig.fov));
 //                poseStack.translate((t * s), r, l);
 //                applyItemArmTransform(poseStack, humanoidArm, equipProgress);
                 customApplyItemArmAttackTransform(poseStack, humanoidArm, swingProgress);

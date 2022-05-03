@@ -26,4 +26,6 @@ public class DebugConfig {
     public float itemOffsetY = 0.65f;
     @FloatSetting(min = -1, max = 1, step = 0.01f)
     public float itemOffsetZ = -0.17f;
+    @FloatSetting(min = -250, max = 250, step = 0.5f)
+    public float fov = 70;
 }
