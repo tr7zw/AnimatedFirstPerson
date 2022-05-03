@@ -11,7 +11,7 @@ public class DebugConfig {
     @FloatSetting(min = -100, max = 100, step = 0.5f)
     public float armAngle = 55;
     @FloatSetting(min = -100, max = 100, step = 0.5f)
-    public float armAngleX = 42.5f;
+    public float armAngleX = -36f;
     @FloatSetting(min = -250, max = 250, step = 0.5f)
     public float armAngleZ = -52.5f;
     @FloatSetting(min = -250, max = 250, step = 0.5f)

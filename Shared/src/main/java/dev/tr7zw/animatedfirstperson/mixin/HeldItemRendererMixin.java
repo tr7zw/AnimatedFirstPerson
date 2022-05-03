@@ -180,13 +180,13 @@ public class HeldItemRendererMixin {
                 float s = -0.4F * Mth.sin(Mth.sqrt(swingProgress) * 3.1415927F);
                 float r = 0.2F * Mth.sin(Mth.sqrt(swingProgress) * 6.2831855F);
                 float l = -0.2F * Mth.sin(swingProgress * 3.1415927F);
-                int t = bl2 ? 1 : -1;
+                int armMultiplicator = bl2 ? 1 : -1; //t
 //                poseStack.translate((t * s), r, l);
 //                applyItemArmTransform(poseStack, humanoidArm, equipProgress);
                 customApplyItemArmAttackTransform(poseStack, humanoidArm, swingProgress);
 //                poseStack.translate(minecraft.player.getX()%1f, minecraft.player.getY()%1f, minecraft.player.getZ()%1f);
                 renderCustomPlayerArm(poseStack, multiBufferSource, light, equipProgress, swingProgress, humanoidArm, !abstractClientPlayer.isInvisible());
-                poseStack.translate(AnimatedFirstPersonShared.debugConfig.itemOffsetX, AnimatedFirstPersonShared.debugConfig.itemOffsetY, AnimatedFirstPersonShared.debugConfig.itemOffsetZ);
+                poseStack.translate(armMultiplicator * AnimatedFirstPersonShared.debugConfig.itemOffsetX, AnimatedFirstPersonShared.debugConfig.itemOffsetY, AnimatedFirstPersonShared.debugConfig.itemOffsetZ);
 //                poseStack.mulPose(Vector3f.XP.rotationDegrees(minecraft.player.yHeadRot));
 //                poseStack.mulPose(Vector3f.ZP.rotationDegrees(minecraft.player.getXRot()));
                 poseStack.mulPose(Vector3f.YP.rotationDegrees(AnimatedFirstPersonShared.debugConfig.itemRotationY));
@@ -212,9 +212,9 @@ public class HeldItemRendererMixin {
         float l = 0.4F * Mth.sin(j * 6.2831855F);
         float m = -0.4F * Mth.sin(swingProgress * 3.1415927F);
         poseStack.translate((armMultiplicator * (k + 0.64000005F)), (l + -0.6F + equipProgress * -0.6F), (m + -0.71999997F));
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(armMultiplicator * AnimatedFirstPersonShared.debugConfig.armAngle)); // angle left right 45.0F
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(armMultiplicator * AnimatedFirstPersonShared.debugConfig.armAngleZ));
         poseStack.mulPose(Vector3f.XP.rotationDegrees(AnimatedFirstPersonShared.debugConfig.armAngleX));
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(AnimatedFirstPersonShared.debugConfig.armAngleZ));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(armMultiplicator * AnimatedFirstPersonShared.debugConfig.armAngle)); // angle left right 45.0F
         // swing
         float n = Mth.sin(swingProgress * swingProgress * 3.1415927F);
         float o = Mth.sin(j * 3.1415927F);
@@ -223,9 +223,9 @@ public class HeldItemRendererMixin {
         AbstractClientPlayer abstractClientPlayer = this.minecraft.player;
         RenderSystem.setShaderTexture(0, abstractClientPlayer.getSkinTextureLocation());
         poseStack.translate((armMultiplicator * -1.0F), 3.5999999046325684D, 3.5D);
-        poseStack.mulPose(Vector3f.ZP.rotationDegrees(armMultiplicator * 120.0F + AnimatedFirstPersonShared.debugConfig.offsetZ));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(armMultiplicator * 120.0F + armMultiplicator * AnimatedFirstPersonShared.debugConfig.offsetZ));
         poseStack.mulPose(Vector3f.XP.rotationDegrees(200.0F + AnimatedFirstPersonShared.debugConfig.offsetX));
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(armMultiplicator * -135.0F + AnimatedFirstPersonShared.debugConfig.offsetY));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(armMultiplicator * -135.0F + armMultiplicator *AnimatedFirstPersonShared.debugConfig.offsetY));
         poseStack.translate((armMultiplicator * 5.6F), 0.0D, 0.0D);
         if(doRender) {
             PlayerRenderer playerRenderer = (PlayerRenderer) this.entityRenderDispatcher
