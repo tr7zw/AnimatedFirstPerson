@@ -12,16 +12,18 @@ public class DebugConfig {
     public float armAngle = 55;
     @FloatSetting(min = -100, max = 100, step = 0.5f)
     public float armAngleX = 42.5f;
-    @FloatSetting(min = -100, max = 100, step = 0.5f)
+    @FloatSetting(min = -250, max = 250, step = 0.5f)
     public float armAngleZ = -52.5f;
-    @FloatSetting(min = -100, max = 100, step = 0.5f)
-    public float itemRotationX = 6;
-    @FloatSetting(min = -100, max = 100, step = 0.5f)
-    public float itemRotationZ = -4.5f;
+    @FloatSetting(min = -250, max = 250, step = 0.5f)
+    public float itemRotationX = 77;
+    @FloatSetting(min = -250, max = 250, step = 0.5f)
+    public float itemRotationY = 0;
+    @FloatSetting(min = -250, max = 250, step = 0.5f)
+    public float itemRotationZ = 180f;
     @FloatSetting(min = -1, max = 1, step = 0.01f)
-    public float itemOffsetX = -0.05f;
+    public float itemOffsetX = -0.4f;
+    @FloatSetting(min = -2, max = 2, step = 0.01f)
+    public float itemOffsetY = 0.65f;
     @FloatSetting(min = -1, max = 1, step = 0.01f)
-    public float itemOffsetY = 0.17f;
-    @FloatSetting(min = -1, max = 1, step = 0.01f)
-    public float itemOffsetZ = -0.11f;
+    public float itemOffsetZ = -0.17f;
 }
