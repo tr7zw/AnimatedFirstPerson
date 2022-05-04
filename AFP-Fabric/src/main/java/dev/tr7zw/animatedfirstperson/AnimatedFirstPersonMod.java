@@ -18,7 +18,7 @@ public class AnimatedFirstPersonMod extends AnimatedFirstPersonShared implements
         ClientTickEvents.START_CLIENT_TICK.register(e ->
         {
             if(keybind.isDown()) {
-                Minecraft.getInstance().setScreen(DebugScreen.createDebugGui(null, AnimatedFirstPersonShared.debugConfig));
+                Minecraft.getInstance().setScreen(DebugScreen.createDebugGui(null, AnimatedFirstPersonShared.debugFrame));
             }
         });
     }

@@ -20,6 +20,7 @@ public class DebugScreen {
                 List<Option> options = new ArrayList<>();
                 for(Field f : config.getClass().getDeclaredFields()) {
                     if(f.getType() == Float.class || f.getType() == float.class) {
+                        f.setAccessible(true);
                         FloatSetting setting = f.getAnnotation(FloatSetting.class);
                         options.add(getDoubleOption(f.getName(), setting != null ? setting.min() : -1, setting != null ? setting.max() : 1, setting != null ? setting.step() : 1, () -> getFloat(config, f), (v) -> setFloat(config, f, v)));
                     }
