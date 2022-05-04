@@ -1,5 +1,6 @@
 package dev.tr7zw.animatedfirstperson;
 
+import dev.tr7zw.animatedfirstperson.animation.Frame;
 import dev.tr7zw.animatedfirstperson.config.CustomConfigScreen;
 import dev.tr7zw.animatedfirstperson.util.Easing;
 import net.minecraft.client.Minecraft;

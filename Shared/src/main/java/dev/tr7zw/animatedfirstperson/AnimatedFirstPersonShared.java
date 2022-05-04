@@ -3,6 +3,8 @@ package dev.tr7zw.animatedfirstperson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import dev.tr7zw.animatedfirstperson.animation.Frame;
+
 public class AnimatedFirstPersonShared {
 
     public static final Logger LOGGER = LogManager.getLogger("AnimatedFirstPerson");

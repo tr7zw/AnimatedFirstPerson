@@ -1,4 +1,4 @@
-package dev.tr7zw.animatedfirstperson;
+package dev.tr7zw.animatedfirstperson.animation;
 
 import dev.tr7zw.animatedfirstperson.config.debug.FloatSetting;
 import dev.tr7zw.animatedfirstperson.util.Easing;
@@ -6,12 +6,12 @@ import net.minecraft.util.Mth;
 
 public class Frame {
 
-    @FloatSetting(min = -100, max = 100, step = 0.5f)
-    private float offsetX = -1;
-    @FloatSetting(min = -100, max = 100, step = 0.5f)
-    private float offsetY = -0.5f;
-    @FloatSetting(min = -100, max = 100, step = 0.5f)
-    private float offsetZ = -5;
+    @FloatSetting(min = -10, max = 10, step = 0.01f)
+    private float offsetX = 0.2f;
+    @FloatSetting(min = -10, max = 10, step = 0.01f)
+    private float offsetY = -0.02f;
+    @FloatSetting(min = -10, max = 10, step = 0.01f)
+    private float offsetZ = -0.13f;
     @FloatSetting(min = -100, max = 100, step = 0.5f)
     private float armAngle = 55;
     @FloatSetting(min = -100, max = 100, step = 0.5f)
