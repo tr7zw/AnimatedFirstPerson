@@ -1,6 +1,7 @@
 package dev.tr7zw.animatedfirstperson;
 
 import dev.tr7zw.animatedfirstperson.animation.Frame;
+import dev.tr7zw.animatedfirstperson.animation.KeyframeAnimation;
 import dev.tr7zw.animatedfirstperson.config.CustomConfigScreen;
 import dev.tr7zw.animatedfirstperson.util.Easing;
 import net.minecraft.client.Minecraft;
@@ -18,16 +19,42 @@ public class AnimationManager {
     private Frame leftHandFrameLast = new Frame();
 
     private Frame tempFrame = new Frame();
-    private Frame fullHit = new Frame() {
+    private Frame restingFrame = new Frame();
+    private KeyframeAnimation hitting = new KeyframeAnimation() {
         {
-            setOffsetX(-1f);
-            setOffsetY(-1f);
-            setOffsetZ(-1.5f);
-            setArmAngle(8);
-            setArmAngleX(-48);
-            setArmAngleZ(-66f);
+            Frame preHit = new Frame() {
+                {
+                    setArmAngleX(-23.5f);
+                    setArmAngleY(100);
+                    setArmAngleZ(-58f);
 
-//            setArmAngle(-10f);
+                }
+            };
+            Frame halfHit = new Frame() {
+                {
+                    setOffsetX(-0.25f);
+                    setOffsetY(-0.22f);
+                    setOffsetZ(-0.39f);
+                    setArmAngleX(-61);
+                    setArmAngleY(52);
+                    setArmAngleZ(-88f);
+
+                }
+            };
+            Frame fullHit = new Frame() {
+                {
+                    setOffsetX(-0.39f);
+                    setOffsetY(-0.41f);
+                    setOffsetZ(-0.3f);
+                    setArmAngleX(-53.5f);
+                    setArmAngleY(-20f);
+                    setArmAngleZ(-139.5f);
+
+                }
+            };
+            addKeyframe(0.3f, preHit);
+            addKeyframe(0.5f, halfHit);
+            addKeyframe(0.6f, fullHit);
         }
     };
 
@@ -65,14 +92,10 @@ public class AnimationManager {
             boolean mainHand = player.swingingArm == InteractionHand.MAIN_HAND;
             boolean rightHanded = player.getMainArm() == HumanoidArm.RIGHT;
             Frame targetFrame = mainHand && rightHanded || mainHand && !rightHanded ? rightHandFrame : leftHandFrame;
-            float fullHitOn = 0.3f;
-            if (player.attackAnim < fullHitOn) {
-                float progress = player.attackAnim / fullHitOn;
-                targetFrame.createFrame(AnimatedFirstPersonShared.debugFrame, fullHit, progress, Easing.INOUTSINE);
-            } else {
-                float progress = (player.attackAnim - fullHitOn) / (1 - fullHitOn);
-                targetFrame.createFrame(fullHit, AnimatedFirstPersonShared.debugFrame, progress, Easing.INOUTSINE);
-            }
+            hitting.tickFrame(player.attackAnim, targetFrame, restingFrame, restingFrame);
+        } else {
+            rightHandFrame.copyFrom(restingFrame);
+            leftHandFrame.copyFrom(restingFrame);
         }
     }
 

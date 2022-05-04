@@ -153,7 +153,7 @@ public class Frame {
         this.offsetZ = offsetZ;
     }
 
-    public void setArmAngle(float armAngle) {
+    public void setArmAngleY(float armAngle) {
         this.armAngleY = armAngle;
     }
 
