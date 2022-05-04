@@ -13,9 +13,9 @@ public class Frame {
     @FloatSetting(min = -10, max = 10, step = 0.01f)
     private float offsetZ = -0.13f;
     @FloatSetting(min = -100, max = 100, step = 0.5f)
-    private float armAngle = 55;
-    @FloatSetting(min = -100, max = 100, step = 0.5f)
     private float armAngleX = -36f;
+    @FloatSetting(min = -100, max = 100, step = 0.5f)
+    private float armAngleY = 55;
     @FloatSetting(min = -250, max = 250, step = 0.5f)
     private float armAngleZ = -52.5f;
     @FloatSetting(min = -250, max = 250, step = 0.5f)
@@ -37,7 +37,7 @@ public class Frame {
         this.offsetX = other.offsetX;
         this.offsetY = other.offsetY;
         this.offsetZ = other.offsetZ;
-        this.armAngle = other.armAngle;
+        this.armAngleY = other.armAngleY;
         this.armAngleX = other.armAngleX;
         this.armAngleZ = other.armAngleZ;
         this.itemRotationX = other.itemRotationX;
@@ -54,7 +54,7 @@ public class Frame {
         this.offsetX = Mth.lerp(delta, to.offsetX, from.offsetX);
         this.offsetY = Mth.lerp(delta, to.offsetY, from.offsetY);
         this.offsetZ = Mth.lerp(delta, to.offsetZ, from.offsetZ);
-        this.armAngle = Mth.lerp(delta, to.armAngle, from.armAngle);
+        this.armAngleY = Mth.lerp(delta, to.armAngleY, from.armAngleY);
         this.armAngleX = Mth.lerp(delta, to.armAngleX, from.armAngleX);
         this.armAngleZ = Mth.lerp(delta, to.armAngleZ, from.armAngleZ);
         this.itemRotationX = Mth.lerp(delta, to.itemRotationX, from.itemRotationX);
@@ -71,7 +71,7 @@ public class Frame {
         this.offsetX = ease(easing, progress, from.offsetX, to.offsetX);
         this.offsetY = ease(easing, progress, from.offsetY, to.offsetY);
         this.offsetZ = ease(easing, progress, from.offsetZ, to.offsetZ);
-        this.armAngle = ease(easing, progress, from.armAngle, to.armAngle);
+        this.armAngleY = ease(easing, progress, from.armAngleY, to.armAngleY);
         this.armAngleX = ease(easing, progress, from.armAngleX, to.armAngleX);
         this.armAngleZ = ease(easing, progress, from.armAngleZ, to.armAngleZ);
         this.itemRotationX = ease(easing, progress, from.itemRotationX, to.itemRotationX);
@@ -101,8 +101,8 @@ public class Frame {
         return offsetZ;
     }
 
-    public float getArmAngle() {
-        return armAngle;
+    public float getArmAngleY() {
+        return armAngleY;
     }
 
     public float getArmAngleX() {
@@ -154,7 +154,7 @@ public class Frame {
     }
 
     public void setArmAngle(float armAngle) {
-        this.armAngle = armAngle;
+        this.armAngleY = armAngle;
     }
 
     public void setArmAngleX(float armAngleX) {

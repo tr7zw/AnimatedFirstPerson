@@ -211,7 +211,7 @@ public class HeldItemRendererMixin {
         poseStack.translate((armMultiplicator * (0.64000005F)) + frame.getOffsetX() * armMultiplicator, (-0.6F + equipProgress * -0.6F + frame.getOffsetY()), (-0.71999997F) + frame.getOffsetZ());
         poseStack.mulPose(Vector3f.ZP.rotationDegrees(armMultiplicator * frame.getArmAngleZ()));
         poseStack.mulPose(Vector3f.XP.rotationDegrees(frame.getArmAngleX()));
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(armMultiplicator * frame.getArmAngle())); // angle left right 45.0F
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(armMultiplicator * frame.getArmAngleY())); // angle left right 45.0F
         poseStack.translate((armMultiplicator * -1.0F), 3.5999999046325684D, 3.5D);
         poseStack.mulPose(Vector3f.ZP.rotationDegrees(armMultiplicator * 120.0F));
         poseStack.mulPose(Vector3f.XP.rotationDegrees(200.0F));
