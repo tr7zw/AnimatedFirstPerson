@@ -1,13 +1,10 @@
 package dev.tr7zw.animatedfirstperson;
 
 import dev.tr7zw.animatedfirstperson.animation.Frame;
-import dev.tr7zw.animatedfirstperson.animation.KeyframeAnimation;
 import dev.tr7zw.animatedfirstperson.config.CustomConfigScreen;
-import dev.tr7zw.animatedfirstperson.util.Easing;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.ItemStack;
 
@@ -19,44 +16,7 @@ public class AnimationManager {
     private Frame leftHandFrameLast = new Frame();
 
     private Frame tempFrame = new Frame();
-    private Frame restingFrame = new Frame();
-    private KeyframeAnimation hitting = new KeyframeAnimation() {
-        {
-            Frame preHit = new Frame() {
-                {
-                    setArmAngleX(-23.5f);
-                    setArmAngleY(100);
-                    setArmAngleZ(-58f);
-
-                }
-            };
-            Frame halfHit = new Frame() {
-                {
-                    setOffsetX(-0.25f);
-                    setOffsetY(-0.22f);
-                    setOffsetZ(-0.39f);
-                    setArmAngleX(-61);
-                    setArmAngleY(52);
-                    setArmAngleZ(-88f);
-
-                }
-            };
-            Frame fullHit = new Frame() {
-                {
-                    setOffsetX(-0.39f);
-                    setOffsetY(-0.41f);
-                    setOffsetZ(-0.3f);
-                    setArmAngleX(-53.5f);
-                    setArmAngleY(-20f);
-                    setArmAngleZ(-139.5f);
-
-                }
-            };
-            addKeyframe(0.3f, preHit);
-            addKeyframe(0.5f, halfHit);
-            addKeyframe(0.6f, fullHit);
-        }
-    };
+    private AnimationRegistry animationRegistry = new AnimationRegistry();
 
     private ItemStack mainHandItem = ItemStack.EMPTY;
     private ItemStack offHandItem = ItemStack.EMPTY;
@@ -88,15 +48,9 @@ public class AnimationManager {
         tickItemSwapAnimation(player);
         rightHandFrameLast.copyFrom(rightHandFrame);
         leftHandFrameLast.copyFrom(leftHandFrame);
-        if (player.swinging) {
-            boolean mainHand = player.swingingArm == InteractionHand.MAIN_HAND;
-            boolean rightHanded = player.getMainArm() == HumanoidArm.RIGHT;
-            Frame targetFrame = mainHand && rightHanded || mainHand && !rightHanded ? rightHandFrame : leftHandFrame;
-            hitting.tickFrame(player.attackAnim, targetFrame, restingFrame, restingFrame);
-        } else {
-            rightHandFrame.copyFrom(restingFrame);
-            leftHandFrame.copyFrom(restingFrame);
-        }
+        boolean rightHanded = player.getMainArm() == HumanoidArm.RIGHT;
+        animationRegistry.update(player, rightHandFrame, rightHanded ? player.getMainHandItem() : player.getOffhandItem(), HumanoidArm.RIGHT, rightHanded);
+        animationRegistry.update(player, leftHandFrame, !rightHanded ? player.getMainHandItem() : player.getOffhandItem(), HumanoidArm.LEFT, !rightHanded);
     }
 
     private void tickItemSwapAnimation(AbstractClientPlayer localPlayer) {
@@ -115,6 +69,10 @@ public class AnimationManager {
 //        float f = localPlayer.getAttackStrengthScale(1.0F);
         this.mainHandHeight = Mth.clamp(/*(f * f * f) +*/ this.mainHandHeight + 0.4F, -0.4F, 1F);
         this.offHandHeight = Mth.clamp(this.offHandHeight + 0.4F, -0.4F, 1F);
+    }
+
+    public AnimationRegistry getAnimationRegistry() {
+        return animationRegistry;
     }
 
 }

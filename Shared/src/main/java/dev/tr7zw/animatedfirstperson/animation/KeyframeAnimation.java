@@ -7,6 +7,7 @@ import dev.tr7zw.animatedfirstperson.util.Easing;
 
 public class KeyframeAnimation {
 
+    private final static Frame fallback = new Frame();
     private List<Keyframe> keyframes = new ArrayList<>();
 
     /**
@@ -39,6 +40,11 @@ public class KeyframeAnimation {
         keyframes.add(new Keyframe(progress, frame));
         keyframes.sort((a, b) -> Float.compare(a.progress, b.progress));
         return this;
+    }
+    
+    public Frame getFirstFrame() {
+        if(keyframes.isEmpty())return fallback;
+        return keyframes.get(0).frame;
     }
 
     private class Keyframe {
