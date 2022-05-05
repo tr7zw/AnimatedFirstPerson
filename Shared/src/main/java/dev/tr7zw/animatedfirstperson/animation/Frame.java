@@ -33,6 +33,46 @@ public class Frame {
     @FloatSetting(min = -250, max = 250, step = 0.5f)
     private float fov = 70;
 
+    public Frame() {
+        
+    }
+    
+    public Frame(float[] data) {
+        if(data.length == 13) {
+            offsetX = data[0];
+            offsetY = data[1];
+            offsetZ = data[2];
+            armAngleX = data[3];
+            armAngleY = data[4];
+            armAngleZ = data[5];
+            itemRotationX = data[6];
+            itemRotationY = data[7];
+            itemRotationZ = data[8];
+            itemOffsetX = data[9];
+            itemOffsetY = data[10];
+            itemOffsetZ = data[11];
+            fov = data[12];
+        }
+    }
+    
+    public float[] getData() {
+        float[] data = new float[13];
+        data[0] = offsetX;
+        data[1] = offsetY;
+        data[2] = offsetZ;
+        data[3] = armAngleX;
+        data[4] = armAngleY;
+        data[5] = armAngleZ;
+        data[6] = itemRotationX;
+        data[7] = itemRotationY;
+        data[8] = itemRotationZ;
+        data[9] = itemOffsetX;
+        data[10] = itemOffsetY;
+        data[11] = itemOffsetZ;
+        data[12] = fov;
+        return data;
+    }
+    
     public Frame copyFrom(Frame other) {
         this.offsetX = other.offsetX;
         this.offsetY = other.offsetY;
