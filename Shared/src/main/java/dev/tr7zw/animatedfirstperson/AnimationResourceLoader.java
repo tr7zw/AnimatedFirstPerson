@@ -21,6 +21,7 @@ import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 
 public class AnimationResourceLoader extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
@@ -51,19 +52,30 @@ public class AnimationResourceLoader extends SimpleJsonResourceReloadListener {
                     if (type == null)
                         continue;
                     if (entry.getValue().isJsonArray()) {
-                        JsonArray array = entry.getValue().getAsJsonArray();
-                        AnimationSet animSet = new AnimationSet();
-                        AtomicBoolean hasAnimations = new AtomicBoolean(false);
-                        array.forEach(el -> {
-                            if (el.isJsonObject()) {
-                                KeyframeAnimation animation = loadAnimation(el.getAsJsonObject());
-                                animSet.addAnimation(animation);
-                                hasAnimations.set(true);
-                            }
-                        });
-                        if (hasAnimations.get())
-                            AnimatedFirstPersonShared.animationManager.getAnimationRegistry().registerTagAnimation(tag,
-                                    type, animSet);
+                        AnimationSet animSet = loadAnimationSet(entry.getValue().getAsJsonArray());
+                        AnimatedFirstPersonShared.animationManager.getAnimationRegistry().registerTagAnimation(tag,
+                                type, animSet);
+                    }
+                }
+                if (entry.getKey().getPath().startsWith("items/")) {
+                    String itemKey = entry.getKey().getPath().replace("items/", "").replace("-", ":");
+                    itemKey = itemKey.substring(0, itemKey.indexOf("/"));
+                    ResourceLocation resourceLocation = new ResourceLocation(itemKey);
+                    System.out.println("Item Folder: " + resourceLocation);
+                    Item item = Registry.ITEM.get(resourceLocation);
+                    if(item == null) {
+                        System.out.println("Item " + resourceLocation + " not found");
+                        continue;
+                    }
+                    String action = entry.getKey().getPath();
+                    action = action.substring(action.lastIndexOf("/") + 1);
+                    AnimationType type = AnimationTypes.animationTypes.get(action);
+                    if (type == null)
+                        continue;
+                    if (entry.getValue().isJsonArray()) {
+                        AnimationSet animSet = loadAnimationSet(entry.getValue().getAsJsonArray());
+                        AnimatedFirstPersonShared.animationManager.getAnimationRegistry().registerItemAnimation(item,
+                                type, animSet);
                     }
                 }
             } catch (Exception ex) {
@@ -72,6 +84,21 @@ public class AnimationResourceLoader extends SimpleJsonResourceReloadListener {
         }
     }
 
+    private AnimationSet loadAnimationSet(JsonArray array) {
+        AnimationSet animSet = new AnimationSet();
+        AtomicBoolean hasAnimations = new AtomicBoolean(false);
+        array.forEach(el -> {
+            if (el.isJsonObject()) {
+                KeyframeAnimation animation = loadAnimation(el.getAsJsonObject());
+                animSet.addAnimation(animation);
+                hasAnimations.set(true);
+            }
+        });
+        if (hasAnimations.get())
+            return animSet;
+        return null;
+    }
+    
     private KeyframeAnimation loadAnimation(JsonObject rootObject) {
         if (!(rootObject.has("weight") || rootObject.has("duration"))) {
             return null;

@@ -139,6 +139,11 @@ public class AnimationRegistry {
         map.put(type, animation);
     }
     
+    public void registerItemAnimation(Item key, AnimationType type, AnimationSet animation) {
+        Map<AnimationType, AnimationSet> map = itemAnimations.computeIfAbsent(key, k -> new HashMap<>());
+        map.put(type, animation);
+    }
+    
     public void reset() {
         tagAnimations.clear();
         itemAnimations.clear();
