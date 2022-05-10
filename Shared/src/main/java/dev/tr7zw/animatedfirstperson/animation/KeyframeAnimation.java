@@ -5,17 +5,24 @@ import java.util.List;
 
 import dev.tr7zw.animatedfirstperson.util.Easing;
 
-public class KeyframeAnimation {
+public class KeyframeAnimation implements Animation {
 
     private final static Frame fallback = new Frame();
+    private final int probability, length;
     private List<Keyframe> keyframes = new ArrayList<>();
-
+    
+    public KeyframeAnimation(int probability, int length) {
+        this.probability = probability;
+        this.length = length;
+    }
+    
     /**
      * @param progress 0-1
      * @param buffer   Frame that get modified with the current info
      * @param before   Frame from before the animation starts
      * @param after    Frame for after the animation ends
      */
+    @Override
     public void tickFrame(float progress, Frame buffer, Frame before, Frame after) {
         // Find the correct frame
         Keyframe next = null;
@@ -36,15 +43,22 @@ public class KeyframeAnimation {
         buffer.createFrame(current != null ? current.frame : before, next != null ? next.frame : after, scaledProgress, Easing.INOUTSINE);
     }
 
-    public KeyframeAnimation addKeyframe(float progress, Frame frame) {
+    public Animation addKeyframe(float progress, Frame frame) {
         keyframes.add(new Keyframe(progress, frame));
         keyframes.sort((a, b) -> Float.compare(a.progress, b.progress));
         return this;
     }
     
+    @Override
     public Frame getFirstFrame() {
         if(keyframes.isEmpty())return fallback;
         return keyframes.get(0).frame;
+    }
+
+    @Override
+    public String toString() {
+        return "KeyframeAnimation [probability=" + probability + ", length=" + length + ", keyframes=" + keyframes
+                + "]";
     }
 
     private class Keyframe {
@@ -61,6 +75,16 @@ public class KeyframeAnimation {
             return "Keyframe [progress=" + progress + ", frame=" + frame + "]";
         }
         
+    }
+
+    @Override
+    public int getProbability() {
+        return probability;
+    }
+
+    @Override
+    public int length() {
+        return length;
     }
 
 }

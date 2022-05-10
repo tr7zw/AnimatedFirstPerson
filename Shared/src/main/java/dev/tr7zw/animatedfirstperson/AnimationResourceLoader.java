@@ -2,6 +2,7 @@ package dev.tr7zw.animatedfirstperson;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,6 +11,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import dev.tr7zw.animatedfirstperson.AnimationTypes.AnimationType;
+import dev.tr7zw.animatedfirstperson.animation.AnimationSet;
 import dev.tr7zw.animatedfirstperson.animation.Frame;
 import dev.tr7zw.animatedfirstperson.animation.KeyframeAnimation;
 import net.minecraft.core.Registry;
@@ -44,33 +46,58 @@ public class AnimationResourceLoader extends SimpleJsonResourceReloadListener {
                     System.out.println("Tag Folder: " + resourceLocation);
                     TagKey<Item> tag = TagKey.create(Registry.ITEM_REGISTRY, resourceLocation);
                     String action = entry.getKey().getPath();
-                    action = action.substring(action.lastIndexOf("/")+1);
+                    action = action.substring(action.lastIndexOf("/") + 1);
                     AnimationType type = AnimationTypes.animationTypes.get(action);
-                    KeyframeAnimation animation =  new KeyframeAnimation();
-                    if(entry.getValue().isJsonObject()) {
-                        JsonObject rootObject = entry.getValue().getAsJsonObject();
-                        if(rootObject.has("frames") && rootObject.get("frames").isJsonObject()) {
-                            JsonObject frames = rootObject.get("frames").getAsJsonObject();
-                            for(Entry<String, JsonElement> frameEntry : frames.entrySet()) {
-                                if(frameEntry.getValue().isJsonArray()) {
-                                    JsonArray jArray = frameEntry.getValue().getAsJsonArray();
-                                    if(jArray.size() == 13) {
-                                        float[] data = new float[13];
-                                        for(int i = 0; i < 13; i++) {
-                                            data[i] = jArray.get(i).getAsFloat();
-                                        }
-                                        animation.addKeyframe(Float.parseFloat(frameEntry.getKey()), new Frame(data));
-                                    }
-                                }
+                    if (type == null)
+                        continue;
+                    if (entry.getValue().isJsonArray()) {
+                        JsonArray array = entry.getValue().getAsJsonArray();
+                        AnimationSet animSet = new AnimationSet();
+                        AtomicBoolean hasAnimations = new AtomicBoolean(false);
+                        array.forEach(el -> {
+                            if (el.isJsonObject()) {
+                                KeyframeAnimation animation = loadAnimation(el.getAsJsonObject());
+                                animSet.addAnimation(animation);
+                                hasAnimations.set(true);
                             }
-                        }
+                        });
+                        if (hasAnimations.get())
+                            AnimatedFirstPersonShared.animationManager.getAnimationRegistry().registerTagAnimation(tag,
+                                    type, animSet);
                     }
-                    AnimatedFirstPersonShared.animationManager.getAnimationRegistry().registerTagAnimation(tag, type, animation);
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
+    }
+
+    private KeyframeAnimation loadAnimation(JsonObject rootObject) {
+        if (!(rootObject.has("weight") || rootObject.has("duration"))) {
+            return null;
+        }
+        KeyframeAnimation animation = new KeyframeAnimation(rootObject.get("weight").getAsInt(),
+                rootObject.get("duration").getAsInt());
+        if (rootObject.has("frames") && rootObject.get("frames").isJsonObject()) {
+            JsonObject frames = rootObject.get("frames").getAsJsonObject();
+            boolean hasFrames = false;
+            for (Entry<String, JsonElement> frameEntry : frames.entrySet()) {
+                if (frameEntry.getValue().isJsonArray()) {
+                    JsonArray jArray = frameEntry.getValue().getAsJsonArray();
+                    if (jArray.size() == 13) {
+                        float[] data = new float[13];
+                        for (int i = 0; i < 13; i++) {
+                            data[i] = jArray.get(i).getAsFloat();
+                        }
+                        animation.addKeyframe(Float.parseFloat(frameEntry.getKey()), new Frame(data));
+                        hasFrames = true;
+                    }
+                }
+            }
+            if (hasFrames)
+                return animation;
+        }
+        return null;
     }
 
 }

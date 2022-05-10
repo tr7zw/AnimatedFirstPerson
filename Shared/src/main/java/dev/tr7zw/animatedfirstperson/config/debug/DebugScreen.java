@@ -83,7 +83,7 @@ public class DebugScreen {
         try {
             String data = Minecraft.getInstance().keyboardHandler.getClipboard();
             if (data != null) {
-                data = data.replace('[', ' ').replace(']', ' ');
+                data = data.replace('[', ' ').replace(']', ' ').replace('\r', ' ').replace('\n', ' ');
                 String[] parts = data.split(",");
                 if (parts.length == 13) {
                     float[] array = new float[13];
