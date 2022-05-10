@@ -10,10 +10,12 @@ public class KeyframeAnimation implements Animation {
     private final static Frame fallback = new Frame();
     private final int probability, length;
     private List<Keyframe> keyframes = new ArrayList<>();
+    private final boolean hideArm;
     
-    public KeyframeAnimation(int probability, int length) {
+    public KeyframeAnimation(int probability, int length, boolean hideArm) {
         this.probability = probability;
         this.length = length;
+        this.hideArm = hideArm;
     }
     
     /**
@@ -60,7 +62,11 @@ public class KeyframeAnimation implements Animation {
         return "KeyframeAnimation [probability=" + probability + ", length=" + length + ", keyframes=" + keyframes
                 + "]";
     }
-
+    
+    public boolean hideArm() {
+        return hideArm;
+    }
+    
     private class Keyframe {
         public final float progress;
         public final Frame frame;

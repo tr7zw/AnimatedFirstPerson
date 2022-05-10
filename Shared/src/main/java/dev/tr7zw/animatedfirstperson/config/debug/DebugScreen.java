@@ -34,6 +34,10 @@ public class DebugScreen {
                                 setting != null ? setting.max() : 1, setting != null ? setting.step() : 1,
                                 () -> getFloat(config.get(), f), (v) -> setFloat(config.get(), f, v)));
                     }
+                    if (f.getType() == Boolean.class || f.getType() == boolean.class) {
+                        f.setAccessible(true);
+                        options.add(getBooleanOption(f.getName(), () -> getBoolean(config.get(), f), (b) -> setBoolean(config.get(), f, b)));
+                    }
                 }
 
                 getOptions().addSmall(options.toArray(new Option[0]));
@@ -114,5 +118,23 @@ public class DebugScreen {
         }
         return 0d;
     }
+    
+    private static void setBoolean(Object config, Field f, Boolean value) {
+        try {
+            f.setBoolean(config, value.booleanValue());
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static Boolean getBoolean(Object config, Field f) {
+        try {
+            return (boolean) f.getBoolean(config);
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 
 }

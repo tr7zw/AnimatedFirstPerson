@@ -32,6 +32,7 @@ public class Frame {
     private float itemOffsetZ = -0.17f;
     @FloatSetting(min = -250, max = 250, step = 0.5f)
     private float fov = 70;
+    private boolean hideArm = false;
 
     public Frame() {
         
@@ -104,6 +105,7 @@ public class Frame {
         this.itemOffsetY = Mth.lerp(delta, to.itemOffsetY, from.itemOffsetY);
         this.itemOffsetZ = Mth.lerp(delta, to.itemOffsetZ, from.itemOffsetZ);
         this.fov = Mth.lerp(delta, to.fov, from.fov);
+        this.hideArm = from.hideArm || to.hideArm;
         return this;
     }
 
@@ -121,6 +123,7 @@ public class Frame {
         this.itemOffsetY = ease(easing, progress, from.itemOffsetY, to.itemOffsetY);
         this.itemOffsetZ = ease(easing, progress, from.itemOffsetZ, to.itemOffsetZ);
         this.fov = ease(easing, progress, from.fov, to.fov);
+        this.hideArm = from.hideArm || to.hideArm;
         return this;
     }
 
@@ -231,6 +234,14 @@ public class Frame {
 
     public void setFov(float fov) {
         this.fov = fov;
+    }
+
+    public boolean isHideArm() {
+        return hideArm;
+    }
+
+    public void setHideArm(boolean hideArm) {
+        this.hideArm = hideArm;
     }
 
 }

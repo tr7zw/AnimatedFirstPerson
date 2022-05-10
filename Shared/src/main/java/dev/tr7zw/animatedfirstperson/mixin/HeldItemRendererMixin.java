@@ -185,7 +185,7 @@ public class HeldItemRendererMixin {
                 Frame frame = animationManager.getFrame(humanoidArm, swingProgress, tickDelta);
                 minecraft.gameRenderer.resetProjectionMatrix(minecraft.gameRenderer.getProjectionMatrix(frame.getFov()));
 
-                renderCustomPlayerArm(frame, poseStack, multiBufferSource, light, equipProgress, swingProgress, humanoidArm, !abstractClientPlayer.isInvisible());
+                renderCustomPlayerArm(frame, poseStack, multiBufferSource, light, equipProgress, swingProgress, humanoidArm, !(abstractClientPlayer.isInvisible() || frame.isHideArm()));
                 poseStack.translate(armMultiplicator * frame.getItemOffsetX(), frame.getItemOffsetY(), frame.getItemOffsetZ());
 
                 poseStack.mulPose(Vector3f.YP.rotationDegrees(frame.getItemRotationY()));

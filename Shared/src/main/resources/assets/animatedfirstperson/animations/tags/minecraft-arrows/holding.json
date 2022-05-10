@@ -1,5 +1,6 @@
 [
     {
+        "hideArm": true,
         "weight": 1,
         "duration": 100,
         "frames": {

@@ -18,12 +18,12 @@ import net.minecraft.world.item.ItemStack;
 
 public class AnimationRegistry {
 
-    private final AnimationSet fallbackHolding = new AnimationSet().addAnimation(new KeyframeAnimation(1, 20) {
+    private final AnimationSet fallbackHolding = new AnimationSet().addAnimation(new KeyframeAnimation(1, 20, false) {
         {
             addKeyframe(0, new Frame());
         }
     });
-    private final AnimationSet fallbackHitting = new AnimationSet().addAnimation(new KeyframeAnimation(1, 1) {
+    private final AnimationSet fallbackHitting = new AnimationSet().addAnimation(new KeyframeAnimation(1, 1, false) {
         {
             Frame preHit = new Frame() {
                 {
@@ -84,6 +84,7 @@ public class AnimationRegistry {
             setupAnimation(animationSate, AnimationTypes.holding, holding, null);
         }
         animationSate.animation.tickFrame(animationSate.progress, targetFrame, holding.getFirst().getFirstFrame(), holding.getFirst().getFirstFrame());
+        targetFrame.setHideArm(animationSate.animation.hideArm());
     }
     
     private void setupAnimation(AnimationState state, AnimationType type, AnimationSet set, Float forcedProgress) {
@@ -141,6 +142,14 @@ public class AnimationRegistry {
     public void reset() {
         tagAnimations.clear();
         itemAnimations.clear();
+    }
+
+    public Animation getMainHandAnimation() {
+        return mainHandState.animation;
+    }
+
+    public Animation getOffHandAnimation() {
+        return offHandState.animation;
     }
     
 }

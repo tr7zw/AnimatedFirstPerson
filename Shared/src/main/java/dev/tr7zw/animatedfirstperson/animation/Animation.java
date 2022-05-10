@@ -25,5 +25,7 @@ public interface Animation {
      * @return
      */
     int length();
+    
+    boolean hideArm();
 
 }

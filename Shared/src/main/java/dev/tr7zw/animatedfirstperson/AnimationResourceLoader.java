@@ -76,8 +76,12 @@ public class AnimationResourceLoader extends SimpleJsonResourceReloadListener {
         if (!(rootObject.has("weight") || rootObject.has("duration"))) {
             return null;
         }
+        boolean hideArm = false;
+        if(rootObject.has("hideArm")) {
+            hideArm = rootObject.get("hideArm").getAsBoolean();
+        }
         KeyframeAnimation animation = new KeyframeAnimation(rootObject.get("weight").getAsInt(),
-                rootObject.get("duration").getAsInt());
+                rootObject.get("duration").getAsInt(), hideArm);
         if (rootObject.has("frames") && rootObject.get("frames").isJsonObject()) {
             JsonObject frames = rootObject.get("frames").getAsJsonObject();
             boolean hasFrames = false;
