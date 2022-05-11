@@ -11,7 +11,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 
 import dev.tr7zw.animatedfirstperson.AnimatedFirstPersonShared;
-import dev.tr7zw.animatedfirstperson.AnimationManager;
+import dev.tr7zw.animatedfirstperson.AnimationProvider;
 import dev.tr7zw.animatedfirstperson.animation.Frame;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -39,7 +39,7 @@ public class HeldItemRendererMixin {
     private ItemStack offHandItem = ItemStack.EMPTY;
     @Shadow
     private EntityRenderDispatcher entityRenderDispatcher;
-    private AnimationManager animationManager = AnimatedFirstPersonShared.animationManager;
+    private AnimationProvider animationManager = AnimatedFirstPersonShared.animationManager;
 
     @Inject(at = @At("HEAD"), method = "renderArmWithItem", cancellable = true)
     public void renderFirstPersonItem(AbstractClientPlayer abstractClientPlayer, float tickDelta, float pitch,
@@ -104,71 +104,7 @@ public class HeldItemRendererMixin {
                     !bl3, poseStack, multiBufferSource, light);
         } else {
             boolean bl2 = (humanoidArm == HumanoidArm.RIGHT);
-            if (abstractClientPlayer.isUsingItem() && abstractClientPlayer.getUseItemRemainingTicks() > 0
-                    && abstractClientPlayer.getUsedItemHand() == interactionHand) {
-                float r, l;
-                int q = bl2 ? 1 : -1;
-                switch (itemStack.getUseAnimation()) {
-                case NONE:
-                    applyItemArmTransform(poseStack, humanoidArm, equipProgress);
-                    break;
-                case EAT:
-                case DRINK:
-                    applyEatTransform(poseStack, tickDelta, humanoidArm, itemStack);
-                    applyItemArmTransform(poseStack, humanoidArm, equipProgress);
-                    break;
-                case BLOCK:
-                    applyItemArmTransform(poseStack, humanoidArm, equipProgress);
-                    break;
-                case BOW:
-                    applyItemArmTransform(poseStack, humanoidArm, equipProgress);
-                    poseStack.translate((q * -0.2785682F), 0.18344387412071228D, 0.15731531381607056D);
-                    poseStack.mulPose(Vector3f.XP.rotationDegrees(-13.935F));
-                    poseStack.mulPose(Vector3f.YP.rotationDegrees(q * 35.3F));
-                    poseStack.mulPose(Vector3f.ZP.rotationDegrees(q * -9.785F));
-                    r = itemStack.getUseDuration() - this.minecraft.player.getUseItemRemainingTicks() - tickDelta
-                            + 1.0F;
-                    l = r / 20.0F;
-                    l = (l * l + l * 2.0F) / 3.0F;
-                    if (l > 1.0F)
-                        l = 1.0F;
-                    if (l > 0.1F) {
-                        float m = Mth.sin((r - 0.1F) * 1.3F);
-                        float n = l - 0.1F;
-                        float o = m * n;
-                        poseStack.translate((o * 0.0F), (o * 0.004F), (o * 0.0F));
-                    }
-                    poseStack.translate((l * 0.0F), (l * 0.0F), (l * 0.04F));
-                    poseStack.scale(1.0F, 1.0F, 1.0F + l * 0.2F);
-                    poseStack.mulPose(Vector3f.YN.rotationDegrees(q * 45.0F));
-                    break;
-                case SPEAR:
-                    applyItemArmTransform(poseStack, humanoidArm, equipProgress);
-                    poseStack.translate((q * -0.5F), 0.699999988079071D, 0.10000000149011612D);
-                    poseStack.mulPose(Vector3f.XP.rotationDegrees(-55.0F));
-                    poseStack.mulPose(Vector3f.YP.rotationDegrees(q * 35.3F));
-                    poseStack.mulPose(Vector3f.ZP.rotationDegrees(q * -9.785F));
-                    r = itemStack.getUseDuration() - this.minecraft.player.getUseItemRemainingTicks() - tickDelta
-                            + 1.0F;
-                    l = r / 10.0F;
-                    if (l > 1.0F)
-                        l = 1.0F;
-                    if (l > 0.1F) {
-                        float m = Mth.sin((r - 0.1F) * 1.3F);
-                        float n = l - 0.1F;
-                        float o = m * n;
-                        poseStack.translate((o * 0.0F), (o * 0.004F), (o * 0.0F));
-                    }
-                    poseStack.translate(0.0D, 0.0D, (l * 0.2F));
-                    poseStack.scale(1.0F, 1.0F, 1.0F + l * 0.2F);
-                    poseStack.mulPose(Vector3f.YN.rotationDegrees(q * 45.0F));
-                    break;
-                }
-                renderItem(abstractClientPlayer, itemStack,
-                        bl2 ? ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND
-                                : ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND,
-                        !bl2, poseStack, multiBufferSource, light);
-            } else if (abstractClientPlayer.isAutoSpinAttack()) {
+            if (abstractClientPlayer.isAutoSpinAttack()) {
                 applyItemArmTransform(poseStack, humanoidArm, equipProgress);
                 int q = bl2 ? 1 : -1;
                 poseStack.translate((q * -0.4F), 0.800000011920929D, 0.30000001192092896D);

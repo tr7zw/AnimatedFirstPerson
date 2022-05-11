@@ -10,7 +10,7 @@ public class AnimatedFirstPersonShared {
     public static final Logger LOGGER = LogManager.getLogger("AnimatedFirstPerson");
     public static AnimatedFirstPersonShared instance;
     public static Frame debugFrame = new Frame();
-    public static AnimationManager animationManager = new AnimationManager();
+    public static AnimationProvider animationManager = new AnimationProvider();
     
     public void init() {
         instance = this;

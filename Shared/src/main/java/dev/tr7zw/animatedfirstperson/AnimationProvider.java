@@ -5,10 +5,11 @@ import dev.tr7zw.animatedfirstperson.config.CustomConfigScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.ItemStack;
 
-public class AnimationManager {
+public class AnimationProvider {
 
     private Frame rightHandFrame = new Frame();
     private Frame leftHandFrame = new Frame();
@@ -49,8 +50,8 @@ public class AnimationManager {
         rightHandFrameLast.copyFrom(rightHandFrame);
         leftHandFrameLast.copyFrom(leftHandFrame);
         boolean rightHanded = player.getMainArm() == HumanoidArm.RIGHT;
-        animationRegistry.update(player, rightHandFrame, rightHanded ? player.getMainHandItem() : player.getOffhandItem(), HumanoidArm.RIGHT, rightHanded);
-        animationRegistry.update(player, leftHandFrame, !rightHanded ? player.getMainHandItem() : player.getOffhandItem(), HumanoidArm.LEFT, !rightHanded);
+        animationRegistry.update(player, rightHandFrame, rightHanded ? player.getMainHandItem() : player.getOffhandItem(), rightHanded ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, HumanoidArm.RIGHT, rightHanded);
+        animationRegistry.update(player, leftHandFrame, !rightHanded ? player.getMainHandItem() : player.getOffhandItem(), !rightHanded ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, HumanoidArm.LEFT, !rightHanded);
     }
 
     private void tickItemSwapAnimation(AbstractClientPlayer localPlayer) {

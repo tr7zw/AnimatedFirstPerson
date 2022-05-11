@@ -12,6 +12,7 @@ import dev.tr7zw.animatedfirstperson.animation.Frame;
 import dev.tr7zw.animatedfirstperson.animation.KeyframeAnimation;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -62,9 +63,14 @@ public class AnimationRegistry {
     });
     private Map<TagKey<Item>, Map<AnimationType, AnimationSet>> tagAnimations = new HashMap<>();
     private Map<Item, Map<AnimationType, AnimationSet>> itemAnimations = new HashMap<>();
+    private Map<AnimationType, AnimationSet> fallbackAnimations = new HashMap<>();
     private final AnimationState mainHandState = new AnimationState();
     private final AnimationState offHandState = new AnimationState();
 
+    public AnimationRegistry() {
+        reset();
+    }
+    
     /**
      * Gets called once per tick for each Arm
      * 
@@ -74,34 +80,58 @@ public class AnimationRegistry {
      * @param arm
      * @param mainHand
      */
-    public void update(AbstractClientPlayer player, Frame targetFrame, ItemStack item, HumanoidArm arm, boolean mainHand) {
+    public void update(AbstractClientPlayer player, Frame targetFrame, ItemStack item, InteractionHand hand,
+            HumanoidArm arm, boolean mainHand) {
         AnimationState animationSate = mainHand ? mainHandState : offHandState;
         AnimationSet holding = getAnimationSet(item, AnimationTypes.holding);
         if (player.swinging && mainHand) {
             AnimationSet hitting = getAnimationSet(item, AnimationTypes.hitting);
             setupAnimation(animationSate, AnimationTypes.hitting, hitting, player.attackAnim);
+        } else if (player.isUsingItem() && player.getUseItemRemainingTicks() > 0 && player.getUsedItemHand() == hand) {
+            AnimationType animationType = null;
+            switch (item.getUseAnimation()) {
+            case EAT:
+                animationType = AnimationTypes.useEating;
+                break;
+            case DRINK:
+                animationType = AnimationTypes.useDrink;
+                break;
+            case BLOCK:
+                animationType = AnimationTypes.useBlock;
+                break;
+            case BOW:
+                animationType = AnimationTypes.useBow;
+                break;
+            case NONE:
+            default:
+                animationType = AnimationTypes.useNone;
+            }
+            AnimationSet animation = getAnimationSet(item, animationType);
+            setupAnimation(animationSate, animationType, animation, null);
         } else {
             setupAnimation(animationSate, AnimationTypes.holding, holding, null);
         }
-        animationSate.animation.tickFrame(animationSate.progress, targetFrame, holding.getFirst().getFirstFrame(), holding.getFirst().getFirstFrame());
+        animationSate.animation.tickFrame(animationSate.progress, targetFrame, holding.getFirst().getFirstFrame(),
+                holding.getFirst().getFirstFrame());
         targetFrame.setHideArm(animationSate.animation.hideArm());
     }
-    
+
     private void setupAnimation(AnimationState state, AnimationType type, AnimationSet set, Float forcedProgress) {
         // is this the same animation as last tick?
-        if(state.lastAnimationSet == set && state.lastAnimationType == type) { //same animation
-            if(forcedProgress != null) { // not timer based animation(hitting)
-                if(state.progress > forcedProgress) { // the animation progress ran backwards = reset = pick new animation
+        if (state.lastAnimationSet == set && state.lastAnimationType == type) { // same animation
+            if (forcedProgress != null) { // not timer based animation(hitting)
+                if (state.progress > forcedProgress) { // the animation progress ran backwards = reset = pick new
+                                                       // animation
                     state.animation = set.getRandomAnimation();
-                }// otherwise we still play the same one
+                } // otherwise we still play the same one
                 state.progress = forcedProgress.floatValue();
             } else { // timer based animation
                 state.animationProgress++;
-                if(state.animationProgress > state.animation.length()) { // animation ran out, pick new one
+                if (state.animationProgress > state.animation.length()) { // animation ran out, pick new one
                     state.animation = set.getRandomAnimation();
                     state.animationProgress = 0;
                 }
-                state.progress = ((float)state.animationProgress) / ((float)state.animation.length());
+                state.progress = ((float) state.animationProgress) / ((float) state.animation.length());
             }
         } else { // animation type changed
             state.lastAnimationType = type;
@@ -111,42 +141,51 @@ public class AnimationRegistry {
             state.animationProgress = 0;
         }
     }
-    
+
     private AnimationSet getAnimationSet(ItemStack item, AnimationType type) {
         Map<AnimationType, AnimationSet> cache = itemAnimations.computeIfAbsent(item.getItem(), i -> new HashMap<>());
-        if(cache.containsKey(type)) {
+        if (cache.containsKey(type)) {
             return cache.get(type);
         }
         AnimationSet lookedUp = lookupAnimation(item, type);
         cache.put(type, lookedUp);
         return lookedUp;
     }
-    
+
     private AnimationSet lookupAnimation(ItemStack item, AnimationType type) {
-        Optional<Map<AnimationType, AnimationSet>> tagData =  tagAnimations.entrySet().stream().filter(entry -> item.is(entry.getKey())).map(entry -> entry.getValue()).findAny();
-        if(tagData.isPresent() && tagData.get().containsKey(type)) {
+        Optional<Map<AnimationType, AnimationSet>> tagData = tagAnimations.entrySet().stream()
+                .filter(entry -> item.is(entry.getKey())).map(entry -> entry.getValue()).findAny();
+        if (tagData.isPresent() && tagData.get().containsKey(type)) {
             return tagData.get().get(type);
         }
         // fallback
-        if(type == AnimationTypes.hitting) {
-            return fallbackHitting;
+        AnimationSet animationSet = fallbackAnimations.get(type);
+        if(animationSet != null) {
+            return animationSet;
         }
-        return fallbackHolding;
+        return fallbackHolding; //should only happen if someone really breaks the fallback set
     }
-    
+
     public void registerTagAnimation(TagKey<Item> key, AnimationType type, AnimationSet animation) {
         Map<AnimationType, AnimationSet> map = tagAnimations.computeIfAbsent(key, k -> new HashMap<>());
         map.put(type, animation);
     }
-    
+
     public void registerItemAnimation(Item key, AnimationType type, AnimationSet animation) {
         Map<AnimationType, AnimationSet> map = itemAnimations.computeIfAbsent(key, k -> new HashMap<>());
         map.put(type, animation);
     }
     
+    public void registerFallbackAnimation(AnimationType type, AnimationSet animation) {
+        fallbackAnimations.put(type, animation);
+    }
+
     public void reset() {
         tagAnimations.clear();
         itemAnimations.clear();
+        fallbackAnimations.clear();
+        fallbackAnimations.put(AnimationTypes.holding, fallbackHolding);
+        fallbackAnimations.put(AnimationTypes.hitting, fallbackHitting);
     }
 
     public Animation getMainHandAnimation() {
@@ -156,5 +195,5 @@ public class AnimationRegistry {
     public Animation getOffHandAnimation() {
         return offHandState.animation;
     }
-    
+
 }

@@ -78,6 +78,17 @@ public class AnimationResourceLoader extends SimpleJsonResourceReloadListener {
                                 type, animSet);
                     }
                 }
+                if (entry.getKey().getPath().startsWith("default/")) {
+                    String action = entry.getKey().getPath();
+                    action = action.substring(action.lastIndexOf("/") + 1);
+                    AnimationType type = AnimationTypes.animationTypes.get(action);
+                    if (type == null)
+                        continue;
+                    if (entry.getValue().isJsonArray()) {
+                        AnimationSet animSet = loadAnimationSet(entry.getValue().getAsJsonArray());
+                        AnimatedFirstPersonShared.animationManager.getAnimationRegistry().registerFallbackAnimation(type, animSet);
+                    }
+                }
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
