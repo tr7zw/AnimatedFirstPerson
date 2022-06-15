@@ -94,8 +94,13 @@ public class AnimationRegistry {
             setupAnimation(animationSate, AnimationTypes.inspect, animation, null);
         } else {
             if(holding == null) { // no animation = use vanilla
-                cleanupAnimation(animationSate, fallbackVanilla, targetFrame);
-                return;
+                if(animationSate.lastAnimationType != null && animationSate.lastAnimationType != AnimationTypes.holding) {
+                    // use internal fallback to return to vanilla state
+                    holding = fallbackHolding;
+                } else {
+                    cleanupAnimation(animationSate, fallbackVanilla, targetFrame);
+                    return;
+                }
             }
             setupAnimation(animationSate, AnimationTypes.holding, holding, null);
         }

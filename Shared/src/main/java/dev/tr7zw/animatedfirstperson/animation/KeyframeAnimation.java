@@ -42,7 +42,7 @@ public class KeyframeAnimation implements Animation {
         float offsetProgress = progress - startProgress;
         float offsetEnd = endProgress - startProgress;
         float scaledProgress = offsetProgress / offsetEnd;
-        buffer.createFrame(current != null ? current.frame : before, next != null ? next.frame : after, scaledProgress, Easing.INOUTSINE);
+        buffer.createFrame(current != null ? current.frame : before, next != null ? next.frame : after, scaledProgress, Easing.SMOOTHSTEP);
     }
 
     public Animation addKeyframe(float progress, Frame frame) {
