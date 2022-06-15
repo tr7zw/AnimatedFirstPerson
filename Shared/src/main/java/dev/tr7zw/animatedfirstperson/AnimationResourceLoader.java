@@ -49,13 +49,18 @@ public class AnimationResourceLoader extends SimpleJsonResourceReloadListener {
                     String action = entry.getKey().getPath();
                     action = action.substring(action.lastIndexOf("/") + 1);
                     AnimationType type = AnimationTypes.animationTypes.get(action);
-                    if (type == null)
+                    if (type == null) {
+                        System.out.println("Unknown type: " + action);
                         continue;
+                    }
                     if (entry.getValue().isJsonArray()) {
                         AnimationSet animSet = loadAnimationSet(entry.getValue().getAsJsonArray());
                         AnimatedFirstPersonShared.animationManager.getAnimationRegistry().registerTagAnimation(tag,
                                 type, animSet);
+                    } else {
+                        System.out.println("Incorrect data type in " + entry.getKey().getPath());
                     }
+                    continue;
                 }
                 if (entry.getKey().getPath().startsWith("items/")) {
                     String itemKey = entry.getKey().getPath().replace("items/", "").replace("-", ":");
@@ -70,25 +75,34 @@ public class AnimationResourceLoader extends SimpleJsonResourceReloadListener {
                     String action = entry.getKey().getPath();
                     action = action.substring(action.lastIndexOf("/") + 1);
                     AnimationType type = AnimationTypes.animationTypes.get(action);
-                    if (type == null)
+                    if (type == null) {
+                        System.out.println("Unknown type: " + action);
                         continue;
+                    }
                     if (entry.getValue().isJsonArray()) {
                         AnimationSet animSet = loadAnimationSet(entry.getValue().getAsJsonArray());
                         AnimatedFirstPersonShared.animationManager.getAnimationRegistry().registerItemAnimation(item,
                                 type, animSet);
+                    } else {
+                        System.out.println("Incorrect data type in " + entry.getKey().getPath());
                     }
+                    continue;
                 }
                 if (entry.getKey().getPath().startsWith("default/")) {
                     String action = entry.getKey().getPath();
                     action = action.substring(action.lastIndexOf("/") + 1);
                     AnimationType type = AnimationTypes.animationTypes.get(action);
-                    if (type == null)
+                    if (type == null) {
+                        System.out.println("Unknown type: " + action);
                         continue;
+                    }
                     if (entry.getValue().isJsonArray()) {
                         AnimationSet animSet = loadAnimationSet(entry.getValue().getAsJsonArray());
                         AnimatedFirstPersonShared.animationManager.getAnimationRegistry().registerFallbackAnimation(type, animSet);
                     }
+                    continue;
                 }
+                System.out.println("Unknown resource: " + entry.getKey().getPath());
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -111,15 +125,13 @@ public class AnimationResourceLoader extends SimpleJsonResourceReloadListener {
     }
     
     private KeyframeAnimation loadAnimation(JsonObject rootObject) {
-        if (!(rootObject.has("weight") || rootObject.has("duration"))) {
-            return null;
-        }
+        int weight = rootObject.has("weight")? rootObject.get("weight").getAsInt() : 1;
+        int duration = rootObject.has("duration")? rootObject.get("duration").getAsInt() : 20;
         boolean hideArm = false;
         if(rootObject.has("hideArm")) {
             hideArm = rootObject.get("hideArm").getAsBoolean();
         }
-        KeyframeAnimation animation = new KeyframeAnimation(rootObject.get("weight").getAsInt(),
-                rootObject.get("duration").getAsInt(), hideArm);
+        KeyframeAnimation animation = new KeyframeAnimation(weight, duration, hideArm);
         if (rootObject.has("frames") && rootObject.get("frames").isJsonObject()) {
             JsonObject frames = rootObject.get("frames").getAsJsonObject();
             boolean hasFrames = false;

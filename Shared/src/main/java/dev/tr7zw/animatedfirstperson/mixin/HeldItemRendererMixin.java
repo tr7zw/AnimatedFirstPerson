@@ -20,13 +20,10 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 @Mixin(ItemInHandRenderer.class)
 public class HeldItemRendererMixin {
@@ -51,91 +48,32 @@ public class HeldItemRendererMixin {
         HumanoidArm humanoidArm = bl ? abstractClientPlayer.getMainArm()
                 : abstractClientPlayer.getMainArm().getOpposite();
         poseStack.pushPose();
-        if (itemStack.isEmpty()) {
-            if (bl && !abstractClientPlayer.isInvisible())
-                renderPlayerArm(poseStack, multiBufferSource, light, equipProgress, swingProgress, humanoidArm);
-        } else if (itemStack.is(Items.FILLED_MAP)) {
-            if (bl && this.offHandItem.isEmpty()) {
-                renderTwoHandedMap(poseStack, multiBufferSource, light, pitch, equipProgress, swingProgress);
-            } else {
-                renderOneHandedMap(poseStack, multiBufferSource, light, equipProgress, humanoidArm, swingProgress,
-                        itemStack);
-            }
-        } else if (itemStack.is(Items.CROSSBOW)) {
-            boolean bl2 = CrossbowItem.isCharged(itemStack);
-            boolean bl3 = (humanoidArm == HumanoidArm.RIGHT);
-            int k = bl3 ? 1 : -1;
-            if (abstractClientPlayer.isUsingItem() && abstractClientPlayer.getUseItemRemainingTicks() > 0
-                    && abstractClientPlayer.getUsedItemHand() == interactionHand) {
-                applyItemArmTransform(poseStack, humanoidArm, equipProgress);
-                poseStack.translate((k * -0.4785682F), -0.0943870022892952D, 0.05731530860066414D);
-                poseStack.mulPose(Vector3f.XP.rotationDegrees(-11.935F));
-                poseStack.mulPose(Vector3f.YP.rotationDegrees(k * 65.3F));
-                poseStack.mulPose(Vector3f.ZP.rotationDegrees(k * -9.785F));
-                float l = itemStack.getUseDuration() - this.minecraft.player.getUseItemRemainingTicks() - tickDelta
-                        + 1.0F;
-                float m = l / CrossbowItem.getChargeDuration(itemStack);
-                if (m > 1.0F)
-                    m = 1.0F;
-                if (m > 0.1F) {
-                    float n = Mth.sin((l - 0.1F) * 1.3F);
-                    float o = m - 0.1F;
-                    float p = n * o;
-                    poseStack.translate((p * 0.0F), (p * 0.004F), (p * 0.0F));
-                }
-                poseStack.translate((m * 0.0F), (m * 0.0F), (m * 0.04F));
-                poseStack.scale(1.0F, 1.0F, 1.0F + m * 0.2F);
-                poseStack.mulPose(Vector3f.YN.rotationDegrees(k * 45.0F));
-            } else {
-                float l = -0.4F * Mth.sin(Mth.sqrt(swingProgress) * 3.1415927F);
-                float m = 0.2F * Mth.sin(Mth.sqrt(swingProgress) * 6.2831855F);
-                float n = -0.2F * Mth.sin(swingProgress * 3.1415927F);
-                poseStack.translate((k * l), m, n);
-                applyItemArmTransform(poseStack, humanoidArm, equipProgress);
-                applyItemArmAttackTransform(poseStack, humanoidArm, swingProgress);
-                if (bl2 && swingProgress < 0.001F && bl) {
-                    poseStack.translate((k * -0.641864F), 0.0D, 0.0D);
-                    poseStack.mulPose(Vector3f.YP.rotationDegrees(k * 10.0F));
-                }
-            }
-            renderItem(abstractClientPlayer, itemStack,
-                    bl3 ? ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND
-                            : ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND,
-                    !bl3, poseStack, multiBufferSource, light);
+        boolean bl2 = (humanoidArm == HumanoidArm.RIGHT);
+        if (abstractClientPlayer.isAutoSpinAttack()) {
+            return;// fall back to vanilla
         } else {
-            boolean bl2 = (humanoidArm == HumanoidArm.RIGHT);
-            if (abstractClientPlayer.isAutoSpinAttack()) {
-                applyItemArmTransform(poseStack, humanoidArm, equipProgress);
-                int q = bl2 ? 1 : -1;
-                poseStack.translate((q * -0.4F), 0.800000011920929D, 0.30000001192092896D);
-                poseStack.mulPose(Vector3f.YP.rotationDegrees(q * 65.0F));
-                poseStack.mulPose(Vector3f.ZP.rotationDegrees(q * -85.0F));
-                renderItem(abstractClientPlayer, itemStack,
-                        bl2 ? ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND
-                                : ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND,
-                        !bl2, poseStack, multiBufferSource, light);
-            } else {
 
-                int armMultiplicator = bl2 ? 1 : -1; //t
-                equipProgress = animationManager.getEquipProgress(abstractClientPlayer, humanoidArm, tickDelta); // overwrite with own that ignores the busy flag
-                Frame frame = animationManager.getFrame(humanoidArm, swingProgress, tickDelta);
-                minecraft.gameRenderer.resetProjectionMatrix(minecraft.gameRenderer.getProjectionMatrix(frame.getFov()));
-
-                renderCustomPlayerArm(frame, poseStack, multiBufferSource, light, equipProgress, swingProgress, humanoidArm, !(abstractClientPlayer.isInvisible() || frame.isHideArm()));
-                poseStack.translate(armMultiplicator * frame.getItemOffsetX(), frame.getItemOffsetY(), frame.getItemOffsetZ());
-
-                poseStack.mulPose(Vector3f.YP.rotationDegrees(frame.getItemRotationY()));
-                poseStack.mulPose(Vector3f.XP.rotationDegrees(frame.getItemRotationX()));
-                poseStack.mulPose(Vector3f.ZP.rotationDegrees(frame.getItemRotationZ()));
-                renderItem(abstractClientPlayer, itemStack,
-                        bl2 ? ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND
-                                : ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND,
-                        !bl2, poseStack, multiBufferSource, light);
+            int armMultiplicator = bl2 ? 1 : -1; //t
+            equipProgress = animationManager.getEquipProgress(abstractClientPlayer, humanoidArm, tickDelta); // overwrite with own that ignores the busy flag
+            Frame frame = animationManager.getFrame(humanoidArm, swingProgress, tickDelta);
+            if(frame == null) {
+                return; // fall back to vanilla
             }
+            minecraft.gameRenderer.resetProjectionMatrix(minecraft.gameRenderer.getProjectionMatrix(frame.getFov()));
+
+            renderCustomPlayerArm(frame, poseStack, multiBufferSource, light, equipProgress, swingProgress, humanoidArm, !(abstractClientPlayer.isInvisible() || frame.isHideArm()));
+            poseStack.translate(armMultiplicator * frame.getItemOffsetX(), frame.getItemOffsetY(), frame.getItemOffsetZ());
+
+            poseStack.mulPose(Vector3f.YP.rotationDegrees(frame.getItemRotationY()));
+            poseStack.mulPose(Vector3f.XP.rotationDegrees(frame.getItemRotationX()));
+            poseStack.mulPose(Vector3f.ZP.rotationDegrees(frame.getItemRotationZ()));
+            renderItem(abstractClientPlayer, itemStack,
+                    bl2 ? ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND
+                            : ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND,
+                    !bl2, poseStack, multiBufferSource, light);
         }
         poseStack.popPose();
         info.cancel();
-        return;
     }
     
     private void renderCustomPlayerArm(Frame frame, PoseStack poseStack, MultiBufferSource multiBufferSource, int light, float equipProgress, float swingProgress,

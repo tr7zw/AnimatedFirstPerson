@@ -3,6 +3,7 @@ package dev.tr7zw.animatedfirstperson;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import dev.tr7zw.animatedfirstperson.AnimationTypes.AnimationType;
 import dev.tr7zw.animatedfirstperson.animation.Animation;
@@ -24,43 +25,7 @@ public class AnimationRegistry {
             addKeyframe(0, new Frame());
         }
     });
-    private final AnimationSet fallbackHitting = new AnimationSet().addAnimation(new KeyframeAnimation(1, 1, false) {
-        {
-            Frame preHit = new Frame() {
-                {
-                    setArmAngleX(-23.5f);
-                    setArmAngleY(100);
-                    setArmAngleZ(-58f);
-
-                }
-            };
-            Frame halfHit = new Frame() {
-                {
-                    setOffsetX(-0.25f);
-                    setOffsetY(-0.22f);
-                    setOffsetZ(-0.39f);
-                    setArmAngleX(-61);
-                    setArmAngleY(52);
-                    setArmAngleZ(-88f);
-
-                }
-            };
-            Frame fullHit = new Frame() {
-                {
-                    setOffsetX(-0.39f);
-                    setOffsetY(-0.41f);
-                    setOffsetZ(-0.3f);
-                    setArmAngleX(-53.5f);
-                    setArmAngleY(-20f);
-                    setArmAngleZ(-139.5f);
-
-                }
-            };
-            addKeyframe(0.3f, preHit);
-            addKeyframe(0.5f, halfHit);
-            addKeyframe(0.6f, fullHit);
-        }
-    });
+    
     private Map<TagKey<Item>, Map<AnimationType, AnimationSet>> tagAnimations = new HashMap<>();
     private Map<Item, Map<AnimationType, AnimationSet>> itemAnimations = new HashMap<>();
     private Map<AnimationType, AnimationSet> fallbackAnimations = new HashMap<>();
@@ -80,12 +45,16 @@ public class AnimationRegistry {
      * @param arm
      * @param mainHand
      */
-    public void update(AbstractClientPlayer player, Frame targetFrame, ItemStack item, InteractionHand hand,
+    public void update(AbstractClientPlayer player, Frame targetFrame, AtomicBoolean fallbackVanilla, ItemStack item, InteractionHand hand,
             HumanoidArm arm, boolean mainHand) {
         AnimationState animationSate = mainHand ? mainHandState : offHandState;
         AnimationSet holding = getAnimationSet(item, AnimationTypes.holding);
         if (player.swinging && mainHand) {
             AnimationSet hitting = getAnimationSet(item, AnimationTypes.hitting);
+            if(hitting == null) { // no animation = use vanilla
+                cleanupAnimation(animationSate, fallbackVanilla, targetFrame);
+                return;
+            }
             setupAnimation(animationSate, AnimationTypes.hitting, hitting, player.attackAnim);
         } else if (player.isUsingItem() && player.getUseItemRemainingTicks() > 0 && player.getUsedItemHand() == hand) {
             AnimationType animationType = null;
@@ -107,13 +76,35 @@ public class AnimationRegistry {
                 animationType = AnimationTypes.useNone;
             }
             AnimationSet animation = getAnimationSet(item, animationType);
+            if(animation == null) { // no animation = use vanilla
+                cleanupAnimation(animationSate, fallbackVanilla, targetFrame);
+                return;
+            }
             setupAnimation(animationSate, animationType, animation, null);
         } else {
+            if(holding == null) { // no animation = use vanilla
+                cleanupAnimation(animationSate, fallbackVanilla, targetFrame);
+                return;
+            }
             setupAnimation(animationSate, AnimationTypes.holding, holding, null);
+        }
+        if(holding == null) {
+            holding = fallbackHolding; // to get a start/end frame for the animation
         }
         animationSate.animation.tickFrame(animationSate.progress, targetFrame, holding.getFirst().getFirstFrame(),
                 holding.getFirst().getFirstFrame());
         targetFrame.setHideArm(animationSate.animation.hideArm());
+        fallbackVanilla.set(false);
+    }
+    
+    private void cleanupAnimation(AnimationState state, AtomicBoolean fallbackVanilla, Frame targetFrame) {
+        fallbackVanilla.set(true);
+        state.animation = null;
+        state.animationProgress = 0;
+        state.lastAnimationType = null;
+        state.lastAnimationType = null;
+        state.progress = 0;
+        targetFrame.copyFrom(fallbackHolding.getFirst().getFirstFrame());
     }
 
     private void setupAnimation(AnimationState state, AnimationType type, AnimationSet set, Float forcedProgress) {
@@ -163,7 +154,7 @@ public class AnimationRegistry {
         if(animationSet != null) {
             return animationSet;
         }
-        return fallbackHolding; //should only happen if someone really breaks the fallback set
+        return null;
     }
 
     public void registerTagAnimation(TagKey<Item> key, AnimationType type, AnimationSet animation) {
@@ -184,8 +175,6 @@ public class AnimationRegistry {
         tagAnimations.clear();
         itemAnimations.clear();
         fallbackAnimations.clear();
-        fallbackAnimations.put(AnimationTypes.holding, fallbackHolding);
-        fallbackAnimations.put(AnimationTypes.hitting, fallbackHitting);
     }
 
     public Animation getMainHandAnimation() {

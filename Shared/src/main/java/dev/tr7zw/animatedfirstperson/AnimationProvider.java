@@ -1,5 +1,7 @@
 package dev.tr7zw.animatedfirstperson;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import dev.tr7zw.animatedfirstperson.animation.Frame;
 import dev.tr7zw.animatedfirstperson.config.CustomConfigScreen;
 import net.minecraft.client.Minecraft;
@@ -25,16 +27,19 @@ public class AnimationProvider {
     private float oMainHandHeight;
     private float offHandHeight;
     private float oOffHandHeight;
+    private AtomicBoolean fallbackVanillaLeft = new AtomicBoolean();
+    private AtomicBoolean fallbackVanillaRight = new AtomicBoolean();
 
     public Frame getFrame(HumanoidArm humanoidArm, float swingProgress, float delta) {
         if (Minecraft.getInstance().screen != null && Minecraft.getInstance().screen instanceof CustomConfigScreen) {
             return AnimatedFirstPersonShared.debugFrame;
         }
-        if (humanoidArm == HumanoidArm.RIGHT) {
+        if (humanoidArm == HumanoidArm.RIGHT && !fallbackVanillaRight.get()) {
             return tempFrame.lerp(rightHandFrame, rightHandFrameLast, delta);
-        } else {
+        } else if(!fallbackVanillaLeft.get()) {
             return tempFrame.lerp(leftHandFrame, leftHandFrameLast, delta);
         }
+        return null;
     }
 
     public float getEquipProgress(AbstractClientPlayer abstractClientPlayer, HumanoidArm arm, float delta) {
@@ -50,8 +55,8 @@ public class AnimationProvider {
         rightHandFrameLast.copyFrom(rightHandFrame);
         leftHandFrameLast.copyFrom(leftHandFrame);
         boolean rightHanded = player.getMainArm() == HumanoidArm.RIGHT;
-        animationRegistry.update(player, rightHandFrame, rightHanded ? player.getMainHandItem() : player.getOffhandItem(), rightHanded ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, HumanoidArm.RIGHT, rightHanded);
-        animationRegistry.update(player, leftHandFrame, !rightHanded ? player.getMainHandItem() : player.getOffhandItem(), !rightHanded ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, HumanoidArm.LEFT, !rightHanded);
+        animationRegistry.update(player, rightHandFrame, fallbackVanillaRight, rightHanded ? player.getMainHandItem() : player.getOffhandItem(), rightHanded ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, HumanoidArm.RIGHT, rightHanded);
+        animationRegistry.update(player, leftHandFrame, fallbackVanillaLeft, !rightHanded ? player.getMainHandItem() : player.getOffhandItem(), !rightHanded ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND, HumanoidArm.LEFT, !rightHanded);
     }
 
     private void tickItemSwapAnimation(AbstractClientPlayer localPlayer) {
