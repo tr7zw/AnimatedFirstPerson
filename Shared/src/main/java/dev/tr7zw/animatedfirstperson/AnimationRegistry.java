@@ -22,7 +22,7 @@ public class AnimationRegistry {
 
     private final AnimationSet fallbackHolding = new AnimationSet().addAnimation(new KeyframeAnimation(1, 20, false) {
         {
-            addKeyframe(0, new Frame());
+            addKeyframe(0, new Frame(new float[] {0.26999998f, -0.17f, 0.17f, -40.5f, 59.5f, -72.5f, 58.5f, 0.0f, 189.0f, -0.4f, 0.65f, -0.17f, 70.0f}));
         }
     });
     
@@ -71,6 +71,9 @@ public class AnimationRegistry {
             case BOW:
                 animationType = AnimationTypes.useBow;
                 break;
+            case SPEAR:
+                animationType = AnimationTypes.useSpear;
+                break;
             case NONE:
             default:
                 animationType = AnimationTypes.useNone;
@@ -81,6 +84,14 @@ public class AnimationRegistry {
                 return;
             }
             setupAnimation(animationSate, animationType, animation, null);
+        } else if(AnimatedFirstPersonShared.instance.isInspecting() && mainHand && !item.isEmpty()) {
+            AnimationSet animation = getAnimationSet(item, AnimationTypes.inspect);
+            if(animation == null) { // no animation = use vanilla
+                //TODO default animation
+                cleanupAnimation(animationSate, fallbackVanilla, targetFrame);
+                return;
+            }
+            setupAnimation(animationSate, AnimationTypes.inspect, animation, null);
         } else {
             if(holding == null) { // no animation = use vanilla
                 cleanupAnimation(animationSate, fallbackVanilla, targetFrame);

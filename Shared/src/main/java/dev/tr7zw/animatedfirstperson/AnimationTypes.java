@@ -14,6 +14,7 @@ public class AnimationTypes {
     public static final AnimationType useBlock = new AnimationType("useblock");
     public static final AnimationType useBow = new AnimationType("usebow");
     public static final AnimationType useSpear = new AnimationType("usespear");
+    public static final AnimationType inspect = new AnimationType("inspect");
     
     
     public static record AnimationType(String name) {
