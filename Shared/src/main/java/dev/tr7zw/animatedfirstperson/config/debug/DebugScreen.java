@@ -10,11 +10,11 @@ import dev.tr7zw.animatedfirstperson.AnimatedFirstPersonShared;
 import dev.tr7zw.animatedfirstperson.animation.Frame;
 import dev.tr7zw.animatedfirstperson.config.CustomConfigScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Option;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Button.OnPress;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 
 public class DebugScreen {
 
@@ -25,7 +25,7 @@ public class DebugScreen {
             public void initialize() {
                 this.background = false;
                 this.footer = false;
-                List<Option> options = new ArrayList<>();
+                List<OptionInstance<?>> options = new ArrayList<>();
                 for (Field f : config.get().getClass().getDeclaredFields()) {
                     if (f.getType() == Float.class || f.getType() == float.class) {
                         f.setAccessible(true);
@@ -40,10 +40,10 @@ public class DebugScreen {
                     }
                 }
 
-                getOptions().addSmall(options.toArray(new Option[0]));
+                getOptions().addSmall(options.toArray(new OptionInstance[0]));
 
                 this.addRenderableWidget(new Button(this.width / 2 - 100, this.height - 27, 100, 20,
-                        new TextComponent("Copy Data"), new OnPress() {
+                        Component.translatable("Copy Data"), new OnPress() {
 
                             @Override
                             public void onPress(Button button) {
@@ -51,7 +51,7 @@ public class DebugScreen {
                             }
                         }));
                 this.addRenderableWidget(new Button(this.width / 2, this.height - 27, 100, 20,
-                        new TextComponent("Load Data"), new OnPress() {
+                        Component.translatable("Load Data"), new OnPress() {
 
                             @Override
                             public void onPress(Button button) {
@@ -59,7 +59,7 @@ public class DebugScreen {
                                 Minecraft.getInstance().setScreen(createDebugGui(parent, config));
                             }
                         }));
-                this.addRenderableWidget(new Button(5, 5, 100, 20, new TextComponent("Reset"), new OnPress() {
+                this.addRenderableWidget(new Button(5, 5, 100, 20, Component.translatable("Reset"), new OnPress() {
 
                     @Override
                     public void onPress(Button button) {

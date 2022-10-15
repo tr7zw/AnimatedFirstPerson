@@ -1,29 +1,23 @@
 package dev.tr7zw.animatedfirstperson.config;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.serialization.Codec;
 
-import net.minecraft.client.CycleOption;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.ProgressOption;
-import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Button.OnPress;
-import net.minecraft.client.gui.components.CycleButton;
-import net.minecraft.client.gui.components.CycleButton.TooltipSupplier;
 import net.minecraft.client.gui.components.OptionsList;
-import net.minecraft.client.gui.components.SliderButton;
 import net.minecraft.client.gui.screens.OptionsSubScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
 public abstract class CustomConfigScreen extends Screen {
@@ -34,7 +28,7 @@ public abstract class CustomConfigScreen extends Screen {
 	protected boolean footer = true;
 
 	public CustomConfigScreen(Screen lastScreen, String title) {
-		super(new TranslatableComponent(title));
+		super(Component.translatable(title));
 		this.lastScreen = lastScreen;
 	}
 
@@ -88,83 +82,53 @@ public abstract class CustomConfigScreen extends Screen {
 		this.renderTooltip(poseStack, list, i, j);
 	}
 	
-	private void updateText(ProgressOption option) {
-	    AbstractWidget widget = getOptions().findOption(option);
-        if(widget instanceof SliderButton) {
-            ((SliderButton)widget).setMessage(option.getMessage(Minecraft.getInstance().options));
-        }else {
-            System.out.println(widget.getClass().getName());
-        }
-	}
+    public OptionInstance<Boolean> getBooleanOption(String translationKey, Supplier<Boolean> current,
+            Consumer<Boolean> update) {
+        return OptionInstance.createBoolean(translationKey, current.get(),update);
+    }
 
-	public CycleOption<Boolean> getBooleanOption(String translationKey, Supplier<Boolean> current,
-			Consumer<Boolean> update) {
-		return CycleOption.createBinaryOption(translationKey, new TranslatableComponent(translationKey + ".on"),
-				new TranslatableComponent(translationKey + ".off"), options -> current.get(),
-				(options, option, boolean_) -> update.accept(boolean_));
-	}
+    public OptionInstance<Boolean> getOnOffOption(String translationKey, Supplier<Boolean> current,
+            Consumer<Boolean> update) {
+        return getBooleanOption(translationKey, current, update);
+    }
+    
+    public OptionInstance<Double> getDoubleOption(String translationKey, float min, float max, float steps, Supplier<Double> current,
+            Consumer<Double> update) {
+        Double sliderValue = ((current.get()-min) / (max-min));
+        return new OptionInstance<Double>(translationKey, OptionInstance.noTooltip(), (comp, d) -> {
+            double lvt_4_1_ = min + (d * (max-min));
+            lvt_4_1_ = (int)(lvt_4_1_/steps);
+            lvt_4_1_ *= steps;
+            return comp.copy().append(": " + round(lvt_4_1_, 3));
+            }, OptionInstance.UnitDouble.INSTANCE, Codec.doubleRange(min, max), sliderValue, (d) ->{
+            double lvt_4_1_ = min + (d * (max-min));
+            lvt_4_1_ = (int)(lvt_4_1_/steps);
+            lvt_4_1_ *= steps;
+            update.accept(lvt_4_1_);
+        });
+    }
 
-	public CycleOption<Boolean> getOnOffOption(String translationKey, Supplier<Boolean> current,
-			Consumer<Boolean> update) {
-		return CycleOption.createOnOff(translationKey, options -> current.get(),
-				(options, option, boolean_) -> update.accept(boolean_));
-	}
-	
-	public ProgressOption getDoubleOption(String translationKey, float min, float max, float steps, Supplier<Double> current,
-			Consumer<Double> update) {
-	    TranslatableComponent comp = new TranslatableComponent(translationKey);
-	    AtomicReference<ProgressOption> option = new AtomicReference<>();
-	    option.set(new ProgressOption(translationKey, min, max, steps, (options) -> current.get(), (options, val) -> {update.accept(val); updateText(option.get());}, (options, opt) -> comp.copy().append(": " + round(current.get(), 3))));
-		return option.get();
-	}
-	
-	public ProgressOption getDoubleOption(String translationKey, float min, float max, float steps, Supplier<Double> current,
-			Consumer<Double> update, String tooltip) {
-	    TranslatableComponent comp = new TranslatableComponent(translationKey);
-		return new ProgressOption(translationKey, min, max, steps, (options) -> current.get(), (options, val) -> update.accept(val), (options, opt) -> comp.append(new TextComponent(": "+opt.get(options))), (minecraft) -> minecraft.font.split(new TranslatableComponent(tooltip), 200));
-	}
-	
-	public ProgressOption getIntOption(String translationKey, float min, float max, Supplier<Integer> current,
-			Consumer<Integer> update) {
-	    TranslatableComponent comp = new TranslatableComponent(translationKey);
-		AtomicReference<ProgressOption> option = new AtomicReference<>();
-		option.set(new ProgressOption(translationKey, min, max, 1, (options) -> (double)current.get(), (options, val) -> {update.accept(val.intValue()); updateText(option.get());}, (options, opt) -> comp.copy().append(": " + current.get())));
-		return option.get();
-	}
-	
-	public ProgressOption getIntOption(String translationKey, float min, float max, Supplier<Integer> current,
-			Consumer<Integer> update, String tooltip) {
-	    TranslatableComponent comp = new TranslatableComponent(translationKey);
-		return new ProgressOption(translationKey, min, max, 1, (options) -> (double)current.get(), (options, val) -> update.accept(val.intValue()), (options, opt) -> comp, (minecraft) -> minecraft.font.split(new TranslatableComponent(tooltip), 200));
-	}
+    public OptionInstance<Integer> getIntOption(String translationKey, int min, int max, Supplier<Integer> current,
+            Consumer<Integer> update) {
+        return new OptionInstance<Integer>(translationKey, OptionInstance.noTooltip(), (comp, d) -> comp.copy().append(": " + d), new OptionInstance.IntRange(min, max), current.get(), (d) -> update.accept(d));
+    }
 
-	public <T extends Enum> CycleOption getEnumOption(String translationKey, Class<T> targetEnum, Supplier<T> current,
-			Consumer<T> update) {
-		return CycleOption.create(translationKey, Arrays.asList(targetEnum.getEnumConstants()),
-				(t) -> new TranslatableComponent(translationKey + "." + t.name()), options -> current.get(),
-				(options, option, value) -> update.accept(value));
-	}
+    @SuppressWarnings("rawtypes")
+    public <T extends Enum> OptionInstance<T> getEnumOption(String translationKey, Class<T> targetEnum, Supplier<T> current,
+            Consumer<T> update) {
+        Map<String, T> mapping = new HashMap<>();
+        Arrays.asList(targetEnum.getEnumConstants()).forEach(t -> mapping.put(t.name(), t));
+        return new OptionInstance<T>(translationKey, OptionInstance.noTooltip(), (comp, t) -> Component.translatable(translationKey + "." + t.name()), new OptionInstance.Enum<T>(Arrays.asList(targetEnum.getEnumConstants()), Codec.STRING.xmap(s -> mapping.get(s), e -> e.name())), current.get(), update);
+    }
+    
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
 
-	public <T> Function<Minecraft, CycleButton.TooltipSupplier<T>> createStaticTooltip(String translationKey) {
-		TranslatableComponent component = new TranslatableComponent(translationKey);
-		return (minecraft) -> {
-			return new TooltipSupplier<T>() {
+        long factor = (long) Math.pow(10, places);
+        value = value * factor;
+        long tmp = Math.round(value);
+        return (double) tmp / factor;
+    }
 
-				@Override
-				public List<FormattedCharSequence> apply(T t) {
-					return minecraft.font.split(component, 200);
-				}
-			};
-		};
-	}
-	
-	public static double round(double value, int places) {
-	    if (places < 0) throw new IllegalArgumentException();
-
-	    long factor = (long) Math.pow(10, places);
-	    value = value * factor;
-	    long tmp = Math.round(value);
-	    return (double) tmp / factor;
-	}
 
 }
