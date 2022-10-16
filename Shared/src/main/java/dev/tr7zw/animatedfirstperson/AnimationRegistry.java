@@ -154,7 +154,7 @@ public class AnimationRegistry {
         }
     }
 
-    private AnimationSet getAnimationSet(ItemStack item, AnimationType type) {
+    public AnimationSet getAnimationSet(ItemStack item, AnimationType type) {
         Map<AnimationType, AnimationSet> cache = itemAnimations.computeIfAbsent(item.getItem(), i -> new HashMap<>());
         if (cache.containsKey(type)) {
             return cache.get(type);

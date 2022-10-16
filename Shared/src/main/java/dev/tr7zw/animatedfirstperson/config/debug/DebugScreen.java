@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import dev.tr7zw.animatedfirstperson.AnimatedFirstPersonShared;
+import dev.tr7zw.animatedfirstperson.AnimationTypes;
 import dev.tr7zw.animatedfirstperson.animation.Frame;
 import dev.tr7zw.animatedfirstperson.config.CustomConfigScreen;
 import net.minecraft.client.Minecraft;
@@ -36,7 +37,8 @@ public class DebugScreen {
                     }
                     if (f.getType() == Boolean.class || f.getType() == boolean.class) {
                         f.setAccessible(true);
-                        options.add(getBooleanOption(f.getName(), () -> getBoolean(config.get(), f), (b) -> setBoolean(config.get(), f, b)));
+                        options.add(getBooleanOption(f.getName(), () -> getBoolean(config.get(), f),
+                                (b) -> setBoolean(config.get(), f, b)));
                     }
                 }
 
@@ -63,7 +65,18 @@ public class DebugScreen {
 
                     @Override
                     public void onPress(Button button) {
-                        AnimatedFirstPersonShared.debugFrame = new Frame();
+                        try {
+                            AnimatedFirstPersonShared.debugFrame = AnimatedFirstPersonShared.animationManager
+                                    .getAnimationRegistry()
+                                    .getAnimationSet(Minecraft.getInstance().player.getMainHandItem(),
+                                            AnimationTypes.holding)
+                                    .getFirst().getFirstFrame();
+                        } catch (NullPointerException ex) {
+                            // dirty, doesn't matter
+                        }
+                        if (AnimatedFirstPersonShared.debugFrame == null) {
+                            AnimatedFirstPersonShared.debugFrame = new Frame();
+                        }
                         Minecraft.getInstance().setScreen(createDebugGui(parent, config));
                     }
                 }));
@@ -118,7 +131,7 @@ public class DebugScreen {
         }
         return 0d;
     }
-    
+
     private static void setBoolean(Object config, Field f, Boolean value) {
         try {
             f.setBoolean(config, value.booleanValue());
@@ -135,6 +148,5 @@ public class DebugScreen {
         }
         return false;
     }
-
 
 }
