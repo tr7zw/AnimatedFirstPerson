@@ -1,6 +1,9 @@
 package dev.tr7zw.animatedfirstperson;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -62,6 +65,31 @@ public class AnimationResourceLoader extends SimpleJsonResourceReloadListener {
                     }
                     continue;
                 }
+                if (entry.getKey().getPath().startsWith("groups/")) {
+                    String action = entry.getKey().getPath();
+                    ResourceLocation itemKey = new ResourceLocation("animatedfirstperson", action.substring(0,action.lastIndexOf("/")+1) + "items");
+                    JsonElement itemJson = map.get(itemKey);
+                    if(itemJson == null) {
+                        System.out.println("No items found at " + itemKey);
+                        continue;
+                    }
+                    Set<Item> items = getItems(itemJson);
+                    action = action.substring(action.lastIndexOf("/") + 1);
+                    AnimationType type = AnimationTypes.animationTypes.get(action);
+                    if (type == null) {
+                        System.out.println("Unknown type: " + action);
+                        continue;
+                    }
+                    if (entry.getValue().isJsonArray()) {
+                        AnimationSet animSet = loadAnimationSet(entry.getValue().getAsJsonArray());
+                        for(Item item : items) {
+                            AnimatedFirstPersonShared.animationManager.getAnimationRegistry().registerItemAnimation(item, type, animSet);
+                        }
+                    } else {
+                        System.out.println("Incorrect data type in " + entry.getKey().getPath());
+                    }
+                    continue;
+                }
                 if (entry.getKey().getPath().startsWith("items/")) {
                     String itemKey = entry.getKey().getPath().replace("items/", "").replace("-", ":");
                     itemKey = itemKey.substring(0, itemKey.indexOf("/"));
@@ -109,6 +137,20 @@ public class AnimationResourceLoader extends SimpleJsonResourceReloadListener {
         }
     }
 
+    private Set<Item> getItems(JsonElement json){
+        Set<Item> items = new HashSet<>();
+        if(json.isJsonArray()) {
+            JsonArray array = json.getAsJsonArray();
+            array.forEach(el ->{
+                Item item = Registry.ITEM.get(new ResourceLocation(el.getAsString()));
+                if(item != null) {
+                    items.add(item);
+                }
+            });
+        }
+        return items;
+    }
+    
     private AnimationSet loadAnimationSet(JsonArray array) {
         AnimationSet animSet = new AnimationSet();
         AtomicBoolean hasAnimations = new AtomicBoolean(false);
