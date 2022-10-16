@@ -48,6 +48,11 @@ public class AnimationRegistry {
     public void update(AbstractClientPlayer player, Frame targetFrame, AtomicBoolean fallbackVanilla, ItemStack item, InteractionHand hand,
             HumanoidArm arm, boolean mainHand) {
         AnimationState animationSate = mainHand ? mainHandState : offHandState;
+        // TODO temporary workaround till "empty hand" can be assigned animations
+        if(item.isEmpty()) {
+            cleanupAnimation(animationSate, fallbackVanilla, targetFrame);
+            return;
+        }
         AnimationSet holding = getAnimationSet(item, AnimationTypes.holding);
         if (player.swinging && mainHand) {
             AnimationSet hitting = getAnimationSet(item, AnimationTypes.hitting);
